@@ -9,7 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "mcpbuilder-ai": "1.0.0",
+    "mcpbuilder-ai": "1.0.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },

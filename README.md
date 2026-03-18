@@ -102,21 +102,21 @@ asyncio.run(main())
 
 | SDK | Package | Docs |
 |-----|---------|------|
-| TypeScript | [`mcpbuilder-ai` on npm](https://www.npmjs.com/package/mcpbuilder-ai) | [TypeScript README](./typescript_sdk/README.md) |
+| TypeScript | [`mcpbuilder-ai` on npm](https://www.npmjs.com/package/mcpbuilder-ai) | [TypeScript README](./typescript-sdk/README.md) |
 | Python | [`mcpbuilder-ai` on PyPI](https://pypi.org/project/mcpbuilder-ai/) | [Python README](./python-sdk/README.md) |
 
 ---
 
 ## Integration Examples
 
-The companion [examples](../mcp-integration-examples/) repo contains ready-to-run projects showing how to connect to MCP servers built on [MCP-Builder.ai](https://mcp-builder.ai/):
+The [examples](./examples/) directory contains ready-to-run projects showing how to connect to MCP servers built on [MCP-Builder.ai](https://mcp-builder.ai/):
 
 | Example | Language | Description |
 |---------|----------|-------------|
-| [Web Chat](../mcp-integration-examples/typescript/) | TypeScript | React-based chat UI with streaming + tool display |
-| [CLI Demo](../mcp-integration-examples/python/) | Python | Terminal chat client with live token streaming |
-| [Movie CLI (Claude)](../mcp-integration-examples/claude/python-movie-cli/) | Python | Claude Code example — movie search assistant |
-| [Recipe Finder (Claude)](../mcp-integration-examples/claude/typescript-recipe-finder/) | TypeScript | Claude Code example — recipe lookup with consent |
+| [React MCP Chat](./examples/typescript/react-mcp-chat/) | TypeScript | React-based chat UI with streaming + tool consent |
+| [Simple Python CLI](./examples/python/simple-python-cli/) | Python | Terminal chat client with live token streaming |
+
+> **New to MCP-Builder.ai?** Check the [Getting Started guide](./examples/mcp-usecase/README.md) to create your first project and grab a project token.
 
 ---
 

@@ -216,7 +216,6 @@ Main client class for interacting with the MCP chat service.
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
-| `mcpClientUrl` | `string` | env `MCP_CLIENT_URL` | WebSocket server URL (required for on-premise) |
 | `projectToken` | `string` | required | Authentication token for the project |
 | `deploymentName` | `string` | required | Deployment identifier |
 | `securityParams` | `Record<string, string>` | `undefined` | Security headers to merge with loaded credentials |

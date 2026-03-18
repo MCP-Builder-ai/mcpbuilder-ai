@@ -50,12 +50,9 @@ poetry install
 Set the required environment variables:
 
 ```bash
-export MCP_CLIENT_URL=https://mcp-client.example.com  # MCP Client Service URL (http/https auto-converted to ws/wss)
 export PROJECT_TOKEN=your-project-token               # Authentication token
 export DEPLOYMENT_NAME=your-deployment                # Deployment identifier
 ```
-
-> **Note:** The SDK automatically converts `http://` to `ws://` and `https://` to `wss://` for WebSocket connections.
 
 ### 2. Basic Usage
 
@@ -71,8 +68,6 @@ async def main():
         project_token=os.getenv("PROJECT_TOKEN"),
         deployment_name=os.getenv("DEPLOYMENT_NAME"),
         cache_history=False,  # Set to True to persist history on server
-        # mcp_client_url only needed for on-premise deployments
-        # mcp_client_url="wss://on-premise.example.com",
         # Optional: provide security params that override loaded credentials
         # security_params={
         #     "X-API-KEY": os.getenv("MY_API_KEY"),
@@ -252,12 +247,9 @@ The SDK uses environment variables for configuration, with optional explicit ove
 
 | Variable | Required | Description |
 |----------|----------|-------------|
-| `MCP_CLIENT_URL` | Yes* | WebSocket URL of the MCP Client Service |
 | `PROJECT_TOKEN` | Yes | Authentication token for your project |
 | `DEPLOYMENT_NAME` | Yes | Your deployment identifier |
 | `TIMEZONE` | No | Client timezone (default: UTC) |
-
-*`MCP_CLIENT_URL` is only required if not passed explicitly to the constructor.
 
 ### Configuration Examples
 
@@ -266,7 +258,6 @@ The SDK uses environment variables for configuration, with optional explicit ove
 import os
 from mcpbuilder import MCPChatClient
 
-# URL loaded from MCP_CLIENT_URL env var
 client = MCPChatClient(
     project_token=os.getenv("PROJECT_TOKEN"),
     deployment_name=os.getenv("DEPLOYMENT_NAME"),
@@ -277,20 +268,6 @@ client = MCPChatClient(
 await client.connect(timezone="Europe/Berlin")
 ```
 
-**On-premise deployment (explicit URL):**
-```python
-import os
-from mcpbuilder import MCPChatClient
-
-# For on-premise installations, pass the URL explicitly
-client = MCPChatClient(
-    project_token=os.getenv("PROJECT_TOKEN"),
-    deployment_name=os.getenv("DEPLOYMENT_NAME"),
-    mcp_client_url="wss://on-premise.customer.com",
-    cache_history=False,  # Set to True to persist history on server
-)
-await client.connect()
-```
 ```
 
 ### Client Options
@@ -302,7 +279,6 @@ from mcpbuilder import MCPChatClient
 client = MCPChatClient(
     project_token=os.getenv("PROJECT_TOKEN"),  # Required: Authentication token
     deployment_name=os.getenv("DEPLOYMENT_NAME"),  # Required: Deployment identifier
-    mcp_client_url=None,                        # Optional: Override MCP_CLIENT_URL env var
     cache_history=False,                        # Cache history on server (default: False)
     auto_reconnect=True,                        # Enable automatic reconnection (default: True)
     max_reconnect_attempts=5,                   # Max reconnection attempts (default: 5)
@@ -384,7 +360,6 @@ The main client class for interacting with the MCP service.
 MCPChatClient(
     project_token: str,                 # Required: Authentication token
     deployment_name: str,               # Required: Deployment identifier
-    mcp_client_url: str | None = None,  # Optional: WebSocket URL (or use MCP_CLIENT_URL env var)
     security_params: dict | None = None,# Optional: Security headers to merge
     system_message: str | None = None,  # Optional: System prompt
     language: str | None = None,        # Optional: Assistant language
@@ -499,7 +474,6 @@ cd python-sdk
 poetry install
 
 # Set required environment variables
-export MCP_CLIENT_URL=wss://mcp-client.example.com
 export PROJECT_TOKEN=your-project-token
 export DEPLOYMENT_NAME=my-deployment
 

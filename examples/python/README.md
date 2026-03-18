@@ -5,26 +5,26 @@ into your Python applications.
 
 ## Examples
 
-### [mcp_integration_demo](./mcp_integration_demo/)
+### [simple-python-cli](./simple-python-cli/)
 
-A complete example project showing how to:
+A simple terminal-based chat client showing how to:
 - Install the SDK from PyPI
-- Configure connection settings
-- Create a reusable chat service wrapper
-- Handle streaming responses and tool executions
-- Build an interactive chat interface
+- Configure connection settings with project token and deployment name
+- Stream AI responses with real-time token output
+- Handle tool executions with auto-consent
+- Build an interactive CLI chat loop
 
 ## Prerequisites
 
 - Python 3.10 or higher
-- Access to an MCP Client Service instance
-- A valid deployment name from your MCPBuilder setup
+- A project on [MCP-Builder.ai](https://mcp-builder.ai/) with a valid project token and deployment name
+- See the [Getting Started guide](../mcp-usecase/README.md) to set up your MCP project
 
 ## Quick Start
 
 1. Navigate to the example directory:
    ```bash
-   cd mcp_integration_demo
+   cd simple-python-cli
    ```
 
 2. Create and activate a virtual environment:
@@ -43,9 +43,9 @@ A complete example project showing how to:
    pip install -r requirements.txt
    ```
 
-4. Update configuration in `config/settings.py`:
-   - Set `DEPLOYMENT_NAME` to your MCPBuilder deployment
-   - Set `MCP_SERVICE_URL` to your MCP client service URL
+4. Update `main.py` with your credentials:
+   - Set `project_token` to your MCPBuilder project token
+   - Set `deployment_name` to your MCPBuilder deployment name
 
 5. Run the example:
    ```bash
@@ -55,9 +55,9 @@ A complete example project showing how to:
 ## Installing the SDK
 
 ```bash
-pip install mcpbuilder-ai==1.0.0
+pip install mcpbuilder-ai==1.0.1
 ```
 
 ## SDK Documentation
 
-For complete SDK documentation, see the [MCPBuilder Python SDK README](../../mcp-integration-sdk/python-sdk/README.md).
+For complete SDK documentation, see the [MCPBuilder Python SDK README](../../python-sdk/README.md).
