@@ -1,6 +1,6 @@
 <p align="center">
   <a href="https://mcp-builder.ai/">
-    <img src="assets/mcp-builder-icon.svg" alt="MCP-Builder.ai" width="120" />
+    <img src="assets/mcp-builder-logo.png" alt="MCP-Builder.ai" width="400" />
   </a>
 </p>
 
