@@ -1,10 +1,32 @@
-# mcpbuilder-ai
+<p align="center">
+  <a href="https://mcp-builder.ai/">
+    <img src="assets/mcp-builder-icon.svg" alt="MCP-Builder.ai" width="120" />
+  </a>
+</p>
 
-**Connect your apps to AI-powered MCP servers — in minutes, not months.**
+<h1 align="center">mcpbuilder-ai</h1>
 
-`mcpbuilder-ai` is the official SDK for [MCP-Builder.ai](https://mcp-builder.ai/), available for both **Python** and **TypeScript**. It lets you stream chat responses, execute tools with consent handling, and manage authentication — all through a clean, callback-driven API over WebSockets.
+<p align="center">
+  <strong>Connect your apps to AI-powered MCP servers — in minutes, not months.</strong>
+</p>
 
-Build your MCP server on the [MCP-Builder.ai](https://mcp-builder.ai/) dashboard, grab your project token, and start talking to it from any app with just a few lines of code.
+<p align="center">
+  <a href="https://www.npmjs.com/package/mcpbuilder-ai"><img src="https://img.shields.io/npm/v/mcpbuilder-ai?style=flat-square&logo=npm&logoColor=white&label=npm&color=CB3837" alt="npm version" /></a>
+  <a href="https://pypi.org/project/mcpbuilder-ai/"><img src="https://img.shields.io/pypi/v/mcpbuilder-ai?style=flat-square&logo=pypi&logoColor=white&label=pypi&color=3775A9" alt="PyPI version" /></a>
+  <a href="./LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-blue?style=flat-square" alt="License" /></a>
+  <img src="https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript" />
+  <img src="https://img.shields.io/badge/Python-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python" />
+  <a href="https://mcp-builder.ai/"><img src="https://img.shields.io/badge/MCP--Builder.ai-Launch%20Dashboard-7C3AED?style=flat-square&logo=rocket&logoColor=white" alt="MCP-Builder.ai" /></a>
+</p>
+
+<p align="center">
+  <code>mcpbuilder-ai</code> is the official SDK for <a href="https://mcp-builder.ai/">MCP-Builder.ai</a>, available for both <b>Python</b> and <b>TypeScript</b>.<br/>
+  Stream chat responses, execute tools with consent handling, and manage authentication — all through a clean, callback-driven API over WebSockets.
+</p>
+
+<p align="center">
+  Build your MCP server on the <a href="https://mcp-builder.ai/">MCP-Builder.ai</a> dashboard, grab your project token, and start talking to it from any app with just a few lines of code.
+</p>
 
 ---
 
