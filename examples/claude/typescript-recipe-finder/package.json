@@ -1,0 +1,21 @@
+{
+  "name": "typescript-recipe-finder",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "dotenv": "^16",
+    "express": "^4",
+    "mcpbuilder-ai": "1.0.1"
+  },
+  "devDependencies": {
+    "@types/express": "^4",
+    "@types/node": "^20",
+    "tsx": "^4",
+    "typescript": "^5"
+  }
+}

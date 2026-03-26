@@ -1,0 +1,600 @@
+openapi: 3.1.0
+info:
+  title: TMDB API - Movie Discovery Subset
+  description: |
+    OpenAPI specification for a Movie Discovery MCP server built on The Movie
+    Database (TMDB) API v3. Covers only the five endpoints required to search,
+    browse, and explore movie data.
+
+    Image paths returned by the API (e.g. `poster_path`) are relative. Prepend
+    the TMDB image base URL to build a full URL:
+    `https://image.tmdb.org/t/p/{size}{path}`
+    Common sizes: `w185`, `w342`, `w500`, `w780`, `original`.
+
+    Attribution: This product uses the TMDB API but is not endorsed or certified
+    by TMDB. Display the TMDB logo and a link to themoviedb.org wherever TMDB
+    data is shown.
+
+    Source API documentation: https://developer.themoviedb.org/reference/intro/getting-started
+  version: "1.0.0"
+  contact:
+    name: TMDB API Documentation
+    url: https://developer.themoviedb.org
+  license:
+    name: TMDB Terms of Use
+    url: https://www.themoviedb.org/documentation/api/terms-of-use
+
+servers:
+  - url: https://api.themoviedb.org/3
+    description: TMDB API v3 production server
+
+components:
+  securitySchemes:
+    apiKey:
+      type: apiKey
+      in: query
+      name: api_key
+      description: >
+        TMDB API key. Obtain one for free by creating an account at
+        https://www.themoviedb.org/signup, then go to Settings > API and copy
+        the "API Key (v3 auth)".
+
+  schemas:
+    MovieSummary:
+      type: object
+      description: A movie as returned in paginated list results (search, discover, trending).
+      properties:
+        id:
+          type: integer
+          description: Unique TMDB movie identifier.
+          example: 550
+        title:
+          type: string
+          description: Localised movie title.
+          example: "Fight Club"
+        original_title:
+          type: string
+          description: Movie title in the original language.
+          example: "Fight Club"
+        overview:
+          type: string
+          description: Short plot summary.
+          example: "A ticking-time-bomb insomniac and a slippery soap salesman..."
+        release_date:
+          type: string
+          format: date
+          description: Primary theatrical release date (YYYY-MM-DD).
+          example: "1999-10-15"
+        vote_average:
+          type: number
+          format: float
+          description: Mean user rating on a 0–10 scale.
+          example: 8.4
+        vote_count:
+          type: integer
+          description: Total number of user votes.
+          example: 26000
+        popularity:
+          type: number
+          format: float
+          description: TMDB popularity score (higher is more popular).
+          example: 45.6
+        poster_path:
+          type: ["string", "null"]
+          description: >
+            Relative path to the movie poster image. Prepend
+            `https://image.tmdb.org/t/p/{size}` to form a complete URL.
+          example: "/pB8BM7pdSp6B6Ih7QZ4DrQ3PmJK.jpg"
+        backdrop_path:
+          type: ["string", "null"]
+          description: >
+            Relative path to the movie backdrop image. Prepend
+            `https://image.tmdb.org/t/p/{size}` to form a complete URL.
+          example: "/fCayJrkfRaCRCTh8GqN30f8oyQF.jpg"
+        genre_ids:
+          type: array
+          description: >
+            List of TMDB genre IDs associated with the movie. Use the
+            `/genre/movie/list` endpoint to resolve IDs to names.
+          items:
+            type: integer
+          example: [18, 53]
+        original_language:
+          type: string
+          description: ISO 639-1 language code of the original movie language.
+          example: "en"
+        adult:
+          type: boolean
+          description: Whether the movie is marked as adult content.
+          example: false
+
+    PaginatedMovieList:
+      type: object
+      description: A paginated list of movie summaries returned by search, discover, and trending endpoints.
+      properties:
+        page:
+          type: integer
+          description: Current page number (1-based).
+          example: 1
+        results:
+          type: array
+          description: Array of movie summaries on the current page.
+          items:
+            $ref: '#/components/schemas/MovieSummary'
+        total_pages:
+          type: integer
+          description: Total number of pages available. Maximum returned by TMDB is 500.
+          example: 42
+        total_results:
+          type: integer
+          description: Total number of movies matching the query across all pages.
+          example: 836
+
+    Genre:
+      type: object
+      description: A TMDB movie genre.
+      properties:
+        id:
+          type: integer
+          description: Unique TMDB genre identifier.
+          example: 28
+        name:
+          type: string
+          description: Human-readable genre name.
+          example: "Action"
+
+    MovieDetails:
+      type: object
+      description: Full details for a single movie, as returned by the movie details endpoint.
+      properties:
+        id:
+          type: integer
+          description: Unique TMDB movie identifier.
+          example: 550
+        title:
+          type: string
+          description: Localised movie title.
+          example: "Fight Club"
+        original_title:
+          type: string
+          description: Movie title in the original language.
+          example: "Fight Club"
+        tagline:
+          type: string
+          description: Movie tagline or marketing slogan.
+          example: "Mischief. Mayhem. Soap."
+        overview:
+          type: string
+          description: Full plot summary.
+          example: "A ticking-time-bomb insomniac and a slippery soap salesman..."
+        status:
+          type: string
+          description: Release status (e.g. Released, In Production, Post Production).
+          example: "Released"
+        release_date:
+          type: string
+          format: date
+          description: Primary theatrical release date (YYYY-MM-DD).
+          example: "1999-10-15"
+        runtime:
+          type: ["integer", "null"]
+          description: Movie runtime in minutes.
+          example: 139
+        budget:
+          type: integer
+          description: Production budget in USD. 0 if unknown.
+          example: 63000000
+        revenue:
+          type: integer
+          description: Box office revenue in USD. 0 if unknown.
+          example: 100853753
+        vote_average:
+          type: number
+          format: float
+          description: Mean user rating on a 0–10 scale.
+          example: 8.4
+        vote_count:
+          type: integer
+          description: Total number of user votes.
+          example: 26000
+        popularity:
+          type: number
+          format: float
+          description: TMDB popularity score.
+          example: 45.6
+        poster_path:
+          type: ["string", "null"]
+          description: >
+            Relative path to the movie poster image. Prepend
+            `https://image.tmdb.org/t/p/{size}` to form a complete URL.
+          example: "/pB8BM7pdSp6B6Ih7QZ4DrQ3PmJK.jpg"
+        backdrop_path:
+          type: ["string", "null"]
+          description: >
+            Relative path to the movie backdrop image. Prepend
+            `https://image.tmdb.org/t/p/{size}` to form a complete URL.
+          example: "/fCayJrkfRaCRCTh8GqN30f8oyQF.jpg"
+        genres:
+          type: array
+          description: Full genre objects (id + name), not just IDs.
+          items:
+            $ref: '#/components/schemas/Genre'
+        original_language:
+          type: string
+          description: ISO 639-1 language code of the original movie language.
+          example: "en"
+        imdb_id:
+          type: ["string", "null"]
+          description: IMDb identifier for the movie.
+          example: "tt0137523"
+        homepage:
+          type: ["string", "null"]
+          description: Official movie website URL, if available.
+          example: "http://www.foxmovies.com/movies/fight-club"
+        adult:
+          type: boolean
+          description: Whether the movie is marked as adult content.
+          example: false
+        production_companies:
+          type: array
+          description: List of production companies involved in the movie.
+          items:
+            type: object
+            description: A production company.
+            properties:
+              id:
+                type: integer
+                description: Unique TMDB production company identifier.
+                example: 508
+              name:
+                type: string
+                description: Production company name.
+                example: "Regency Enterprises"
+              origin_country:
+                type: string
+                description: ISO 3166-1 country code of the production company.
+                example: "US"
+              logo_path:
+                type: ["string", "null"]
+                description: Relative path to the company logo image.
+                example: "/7PzJdsLGlR7oW4J0J5Xcd0pHGRg.png"
+
+    ErrorResponse:
+      type: object
+      description: Standard TMDB error response body.
+      properties:
+        status_code:
+          type: integer
+          description: TMDB internal status code identifying the error type.
+          example: 7
+        status_message:
+          type: string
+          description: Human-readable explanation of the error.
+          example: "Invalid API key: You must be granted a valid key."
+        success:
+          type: boolean
+          description: Always false for error responses.
+          example: false
+
+paths:
+  /search/movie:
+    get:
+      operationId: searchMovies
+      summary: Search for movies by title
+      security:
+        - apiKey: []
+      description: |
+        Full-text search across movie titles. Returns a paginated list of movies
+        whose title (or original title) matches the query string. Results are
+        ordered by relevance. Use the `year` parameter to narrow results to a
+        specific release year.
+      parameters:
+        - name: query
+          in: query
+          required: true
+          description: The text to search for. Matched against movie titles and original titles.
+          schema:
+            type: string
+            example: "Fight Club"
+        - name: year
+          in: query
+          required: false
+          description: >
+            Filter results to movies with a release date in this year. Applies to
+            all release types (theatrical, digital, etc.). Use `primary_release_year`
+            if you want to restrict specifically to the primary theatrical release.
+          schema:
+            type: integer
+            example: 1999
+        - name: language
+          in: query
+          required: false
+          description: >
+            ISO 639-1 language code used to localise titles and overviews in the
+            response. Defaults to `en-US`.
+          schema:
+            type: string
+            default: en-US
+            example: "en-US"
+        - name: page
+          in: query
+          required: false
+          description: Page of results to return. Accepts 1–500. Defaults to 1.
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 500
+            default: 1
+            example: 1
+      responses:
+        '200':
+          description: Successful search response with a paginated list of matching movies.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedMovieList'
+        '400':
+          description: Bad request — typically a missing or invalid `query` parameter.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Authentication failed — the provided `api_key` is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /movie/{movie_id}:
+    get:
+      operationId: getMovieDetails
+      summary: Get full details for a movie
+      security:
+        - apiKey: []
+      description: |
+        Returns the complete record for a single movie identified by its TMDB ID.
+        Includes runtime, budget, revenue, full genre objects, production companies,
+        IMDb ID, tagline, and more — fields that are absent from the list endpoints.
+
+        TMDB IDs can be obtained from the results of `searchMovies`,
+        `discoverMovies`, or `getTrendingMovies`.
+      parameters:
+        - name: movie_id
+          in: path
+          required: true
+          description: The TMDB numeric identifier of the movie.
+          schema:
+            type: integer
+            example: 550
+        - name: language
+          in: query
+          required: false
+          description: >
+            ISO 639-1 language code used to localise the response (titles,
+            overviews, taglines). Defaults to `en-US`.
+          schema:
+            type: string
+            default: en-US
+            example: "en-US"
+      responses:
+        '200':
+          description: Successful response containing the full movie record.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MovieDetails'
+        '401':
+          description: Authentication failed — the provided `api_key` is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: No movie found for the given `movie_id`.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /trending/movie/{time_window}:
+    get:
+      operationId: getTrendingMovies
+      summary: Get currently trending movies
+      security:
+        - apiKey: []
+      description: |
+        Returns a paginated list of movies that are trending within the specified
+        time window. Trending is calculated by TMDB from user activity (views,
+        ratings, watchlist adds) across their platform.
+
+        Use `day` for a fast-moving list that refreshes every 24 hours, or `week`
+        for a more stable list reflecting the past 7 days.
+      parameters:
+        - name: time_window
+          in: path
+          required: true
+          description: >
+            The period over which trending is calculated. Must be either `day`
+            (last 24 hours) or `week` (last 7 days).
+          schema:
+            type: string
+            enum:
+              - day
+              - week
+            example: "week"
+        - name: language
+          in: query
+          required: false
+          description: >
+            ISO 639-1 language code used to localise titles and overviews in the
+            response. Defaults to `en-US`.
+          schema:
+            type: string
+            default: en-US
+            example: "en-US"
+      responses:
+        '200':
+          description: Successful response with a paginated list of trending movies.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedMovieList'
+        '401':
+          description: Authentication failed — the provided `api_key` is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Invalid `time_window` value supplied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /discover/movie:
+    get:
+      operationId: discoverMovies
+      summary: Discover movies using filters and sorting
+      security:
+        - apiKey: []
+      description: |
+        The most powerful endpoint for movie discovery. Applies one or more
+        filters to the full TMDB catalogue and returns a paginated, sorted list
+        of matching movies. Filters can be combined freely — only movies that
+        satisfy all supplied filters are returned.
+
+        Common use cases:
+        - "Top-rated action movies from 2023" → `with_genres=28`, `primary_release_year=2023`, `sort_by=vote_average.desc`
+        - "Popular English-language movies with at least 100 votes" → `sort_by=popularity.desc`, `vote_count.gte=100`
+      parameters:
+        - name: with_genres
+          in: query
+          required: false
+          description: >
+            Filter by genre. Accepts a comma-separated list of TMDB genre IDs to
+            require all listed genres (AND logic), or a pipe-separated list for
+            any of the listed genres (OR logic). Genre IDs can be retrieved with
+            the `listGenres` operation.
+          schema:
+            type: string
+            example: "28,12"
+        - name: vote_average.gte
+          in: query
+          required: false
+          description: >
+            Minimum user rating (inclusive) on a 0–10 scale. Only movies with a
+            `vote_average` at or above this value are returned.
+          schema:
+            type: number
+            format: float
+            minimum: 0
+            maximum: 10
+            example: 7.0
+        - name: primary_release_year
+          in: query
+          required: false
+          description: >
+            Restrict results to movies whose primary theatrical release year
+            matches this value exactly.
+          schema:
+            type: integer
+            example: 2023
+        - name: sort_by
+          in: query
+          required: false
+          description: >
+            Field and direction to sort results by. Defaults to `popularity.desc`.
+            Supported values: `popularity.asc`, `popularity.desc`,
+            `revenue.asc`, `revenue.desc`, `primary_release_date.asc`,
+            `primary_release_date.desc`, `vote_average.asc`, `vote_average.desc`,
+            `vote_count.asc`, `vote_count.desc`.
+          schema:
+            type: string
+            default: popularity.desc
+            enum:
+              - popularity.asc
+              - popularity.desc
+              - revenue.asc
+              - revenue.desc
+              - primary_release_date.asc
+              - primary_release_date.desc
+              - vote_average.asc
+              - vote_average.desc
+              - vote_count.asc
+              - vote_count.desc
+            example: "vote_average.desc"
+        - name: page
+          in: query
+          required: false
+          description: Page of results to return. Accepts 1–500. Defaults to 1.
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 500
+            default: 1
+            example: 1
+      responses:
+        '200':
+          description: Successful response with a paginated list of movies matching the applied filters.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedMovieList'
+        '400':
+          description: Bad request — one or more filter parameters are invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Authentication failed — the provided `api_key` is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /genre/movie/list:
+    get:
+      operationId: listGenres
+      summary: List all official movie genres
+      security:
+        - apiKey: []
+      description: |
+        Returns the complete list of TMDB's official movie genres, each with a
+        numeric ID and a localised name. Use this to:
+        - Map `genre_ids` arrays from search/discover/trending results to
+          human-readable names.
+        - Look up genre IDs before calling `discoverMovies` with `with_genres`.
+      parameters:
+        - name: language
+          in: query
+          required: false
+          description: >
+            ISO 639-1 language code used to localise the genre names in the
+            response. Defaults to `en-US`.
+          schema:
+            type: string
+            default: en-US
+            example: "en-US"
+      responses:
+        '200':
+          description: Successful response containing the full list of movie genres.
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Wrapper object containing the genres array.
+                properties:
+                  genres:
+                    type: array
+                    description: Complete list of official TMDB movie genres.
+                    items:
+                      $ref: '#/components/schemas/Genre'
+        '401':
+          description: Authentication failed — the provided `api_key` is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'

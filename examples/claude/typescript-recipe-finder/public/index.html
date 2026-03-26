@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ChefBot — Recipe Discovery</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #faf8f4;
+      --card:      #ffffff;
+      --primary:   #e8702a;
+      --primary-h: #c95d1e;
+      --text:      #1e1e1e;
+      --muted:     #888;
+      --border:    #e8ddd0;
+      --radius:    14px;
+      --font:      -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Header ─────────────────────────────────────────── */
+    header {
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 28px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    .logo {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: var(--primary);
+      letter-spacing: -0.02em;
+    }
+
+    .logo-icon { margin-right: 4px; }
+
+    .tagline {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-left: 4px;
+    }
+
+    /* ── Chat layout ─────────────────────────────────────── */
+    .chat-wrapper {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      max-width: 780px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    /* ── Messages area ───────────────────────────────────── */
+    #response-area {
+      flex: 1;
+      overflow-y: auto;
+      padding: 28px 24px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* ── Bottom bar ──────────────────────────────────────── */
+    .bottom-bar {
+      flex-shrink: 0;
+      background: var(--bg);
+      border-top: 1px solid var(--border);
+      padding: 12px 24px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    #query {
+      flex: 1;
+      padding: 14px 18px;
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 1rem;
+      font-family: var(--font);
+      background: var(--card);
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    #query:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(232, 112, 42, 0.12);
+    }
+
+    #query:disabled { background: #f4f1ec; }
+
+    #send-btn {
+      padding: 14px 22px;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.18s, transform 0.1s;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    #send-btn:hover:not(:disabled) { background: var(--primary-h); }
+    #send-btn:active:not(:disabled) { transform: scale(0.97); }
+    #send-btn:disabled { background: #ccc; cursor: not-allowed; }
+
+    /* ── Chips ──────────────────────────────────────────── */
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .chip {
+      padding: 7px 15px;
+      background: var(--card);
+      border: 1.5px solid var(--border);
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-family: var(--font);
+      cursor: pointer;
+      color: var(--text);
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+    }
+
+    .chip:hover:not(:disabled) {
+      border-color: var(--primary);
+      color: var(--primary);
+      background: #fff6f0;
+    }
+
+    .chip:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* ── Welcome ─────────────────────────────────────────── */
+    .welcome {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      padding: 56px 24px;
+      text-align: center;
+      color: var(--muted);
+      margin: auto;
+    }
+
+    .welcome-icon { font-size: 3.5rem; line-height: 1; }
+
+    .welcome p {
+      font-size: 1rem;
+      line-height: 1.65;
+      max-width: 400px;
+    }
+
+    /* ── User bubble ─────────────────────────────────────── */
+    .user-bubble {
+      align-self: flex-start;
+      background: #fff5ed;
+      border: 1.5px solid #f5c9a0;
+      border-radius: 999px;
+      padding: 7px 16px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: #a05010;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      animation: slide-in 0.25s ease;
+    }
+
+    /* ── Tool activity bar ───────────────────────────────── */
+    .tool-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.82rem;
+      color: var(--muted);
+      padding: 2px 0;
+      animation: slide-in 0.2s ease;
+    }
+
+    .tool-dots { display: flex; gap: 4px; }
+
+    .tool-dots span {
+      width: 5px;
+      height: 5px;
+      background: var(--primary);
+      border-radius: 50%;
+      animation: bounce 1.2s infinite;
+    }
+
+    .tool-dots span:nth-child(2) { animation-delay: 0.2s; }
+    .tool-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+    /* ── Response card ───────────────────────────────────── */
+    .response-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px 26px;
+      line-height: 1.75;
+      font-size: 0.95rem;
+      animation: slide-in 0.3s ease;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    }
+
+    .chef-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--primary);
+      margin-bottom: 12px;
+    }
+
+    .response-content { white-space: pre-wrap; word-break: break-word; }
+
+    .response-content img.meal-thumb {
+      display: block;
+      max-width: 240px;
+      border-radius: 10px;
+      margin: 10px 0 6px;
+      object-fit: cover;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    /* Blinking cursor while streaming */
+    .cursor {
+      display: inline-block;
+      width: 2px;
+      height: 0.95em;
+      background: var(--primary);
+      margin-left: 1px;
+      vertical-align: text-bottom;
+      animation: blink 1s step-end infinite;
+    }
+
+    /* ── Tools used ──────────────────────────────────────── */
+    .tools-used {
+      margin-top: 14px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .tool-chip {
+      font-size: 0.75rem;
+      color: var(--muted);
+      background: #f7f4f0;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 3px 10px;
+    }
+
+    /* ── Error ───────────────────────────────────────────── */
+    .error-msg {
+      font-size: 0.875rem;
+      color: #c0392b;
+      padding: 8px 0;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* ── Animations ─────────────────────────────────────── */
+    @keyframes slide-in {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes bounce {
+      0%, 80%, 100% { transform: scale(0.6); opacity: 0.5; }
+      40%           { transform: scale(1);   opacity: 1;   }
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50%      { opacity: 0; }
+    }
+
+    /* ── Responsive ─────────────────────────────────────── */
+    @media (max-width: 600px) {
+      header { padding: 12px 16px; }
+      #response-area { padding: 20px 16px 12px; }
+      .bottom-bar { padding: 10px 16px 16px; }
+      .response-card { padding: 16px 18px; }
+      .response-content img.meal-thumb { max-width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <span class="logo"><span class="logo-icon">🍽️</span>ChefBot</span>
+  <span class="tagline">Recipe Discovery · Powered by TheMealDB</span>
+</header>
+
+<div class="chat-wrapper">
+
+  <div id="response-area">
+    <div class="welcome">
+      <div class="welcome-icon">🍳</div>
+      <p>Ask me about any meal, cuisine, or ingredient.<br>I'll find the perfect recipe for you!</p>
+    </div>
+  </div>
+
+  <div class="bottom-bar">
+    <div class="chips">
+      <button class="chip" data-q="Surprise me with a random meal">🎲 Surprise me!</button>
+      <button class="chip" data-q="Show me popular Italian meals">🇮🇹 Italian</button>
+      <button class="chip" data-q="Find chicken recipes">🍗 Chicken</button>
+      <button class="chip" data-q="Show me vegetarian meals">🥗 Vegetarian</button>
+      <button class="chip" data-q="What pasta dishes are available?">🍝 Pasta</button>
+      <button class="chip" data-q="Show me seafood recipes">🦞 Seafood</button>
+      <button class="chip" data-q="Quick dessert ideas">🍮 Desserts</button>
+    </div>
+    <div class="input-row">
+      <input
+        type="text"
+        id="query"
+        placeholder="Ask about any meal, cuisine, or ingredient…"
+        autocomplete="off"
+        spellcheck="false"
+      />
+      <button id="send-btn" aria-label="Search">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path d="M2 8h12M9 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Ask
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const queryInput = document.getElementById('query');
+  const sendBtn    = document.getElementById('send-btn');
+  const area       = document.getElementById('response-area');
+  const chips      = document.querySelectorAll('.chip');
+
+  // ── Event wiring ────────────────────────────────────────
+  sendBtn.addEventListener('click', () => submit(queryInput.value));
+
+  queryInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submit(queryInput.value); }
+  });
+
+  chips.forEach(c => c.addEventListener('click', () => submit(c.dataset.q)));
+
+  // ── Submit ───────────────────────────────────────────────
+  async function submit(text) {
+    text = (text ?? '').trim();
+    if (!text) return;
+
+    queryInput.value = '';
+    setLoading(true);
+
+    document.querySelector('.welcome')?.remove();
+
+    const bubble = el('div', 'user-bubble', '↗ ' + text);
+    area.appendChild(bubble);
+    scrollDown();
+
+    const toolBar = el('div', 'tool-bar');
+    toolBar.innerHTML = `
+      <div class="tool-dots"><span></span><span></span><span></span></div>
+      <span class="tool-label">Thinking…</span>
+    `;
+    area.appendChild(toolBar);
+    scrollDown();
+
+    const card = el('div', 'response-card');
+    card.innerHTML = '<div class="chef-label">ChefBot</div><div class="response-content"></div>';
+    const content = card.querySelector('.response-content');
+    const cursor  = el('span', 'cursor');
+
+    let rawText         = '';
+    let responseStarted = false;
+    const toolsUsed     = [];
+
+    try {
+      const res = await fetch('/api/chat', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ message: text }),
+      });
+
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({ error: res.statusText }));
+        showError(body.error || 'Request failed', toolBar);
+        setLoading(false);
+        return;
+      }
+
+      const reader  = res.body.getReader();
+      const decoder = new TextDecoder();
+      let   buffer  = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+
+        const parts = buffer.split('\n\n');
+        buffer = parts.pop();
+
+        for (const part of parts) {
+          const ev = parseSseEvent(part);
+          if (!ev) continue;
+
+          if (ev.type === 'tool_start') {
+            const name = ev.data.name || '';
+            toolsUsed.push({ name, success: true });
+            toolBar.querySelector('.tool-label').textContent = `Looking up: ${name.replace(/_/g, ' ')}…`;
+          }
+
+          if (ev.type === 'tool_end') {
+            const entry = [...toolsUsed].reverse().find(t => t.name === (ev.data.name || ''));
+            if (entry) entry.success = ev.data.success !== false;
+          }
+
+          if (ev.type === 'token') {
+            if (!responseStarted) {
+              responseStarted = true;
+              toolBar.remove();
+              area.appendChild(card);
+            }
+            rawText += ev.data.text || '';
+            content.innerHTML = renderContent(rawText);
+            content.appendChild(cursor);
+            scrollDown();
+          }
+
+          if (ev.type === 'final') {
+            cursor.remove();
+            if (!responseStarted) {
+              toolBar.remove();
+              area.appendChild(card);
+              if (ev.data.text) content.innerHTML = renderContent(ev.data.text);
+            }
+            if (toolsUsed.length > 0) {
+              const toolsEl = el('div', 'tools-used');
+              toolsEl.innerHTML = toolsUsed
+                .map(t => `<span class="tool-chip">${t.success ? '✓' : '✗'} ${t.name.replace(/_/g, ' ')}</span>`)
+                .join('');
+              card.appendChild(toolsEl);
+            }
+            setLoading(false);
+            scrollDown();
+          }
+
+          if (ev.type === 'error') {
+            cursor.remove();
+            showError(ev.data.message || 'Unknown error', responseStarted ? null : toolBar);
+            setLoading(false);
+          }
+        }
+      }
+    } catch (err) {
+      showError(err.message || String(err), toolBar);
+      setLoading(false);
+    }
+  }
+
+  // ── SSE parser ───────────────────────────────────────────
+  function parseSseEvent(raw) {
+    let type = null, data = null;
+    for (const line of raw.split('\n')) {
+      if (line.startsWith('event: ')) type = line.slice(7).trim();
+      if (line.startsWith('data: '))  { try { data = JSON.parse(line.slice(6)); } catch {} }
+    }
+    return (type && data) ? { type, data } : null;
+  }
+
+  // ── Content renderer ─────────────────────────────────────
+  function renderContent(text) {
+    let html = text
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+
+    html = html.replace(
+      /Thumbnail:\s*(https?:\/\/\S+)/g,
+      (_, url) => `Thumbnail: <img class="meal-thumb" src="${url}" alt="Meal photo" loading="lazy">`
+    );
+
+    html = html.replace(
+      /^(Ingredients:|Instructions:|Cuisine:|Category:|Overview:|Tagline:)(\s)/gm,
+      '<strong class="section-header">$1</strong>$2'
+    );
+
+    return html;
+  }
+
+  // ── Helpers ──────────────────────────────────────────────
+  function el(tag, className, text) {
+    const e = document.createElement(tag);
+    if (className) e.className = className;
+    if (text)      e.textContent = text;
+    return e;
+  }
+
+  function showError(msg, removeEl) {
+    removeEl?.remove();
+    area.appendChild(el('div', 'error-msg', '⚠ ' + msg));
+    scrollDown();
+  }
+
+  function setLoading(on) {
+    sendBtn.disabled    = on;
+    queryInput.disabled = on;
+    chips.forEach(c => { c.disabled = on; });
+    sendBtn.lastChild.textContent = on ? ' …' : ' Ask';
+  }
+
+  function scrollDown() {
+    area.scrollTop = area.scrollHeight;
+  }
+</script>
+
+</body>
+</html>

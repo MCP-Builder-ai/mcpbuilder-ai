@@ -1,0 +1,515 @@
+openapi: 3.1.0
+info:
+  title: TheMealDB API - Meal Recipe Finder Subset
+  description: |
+    OpenAPI specification for a Meal Recipe Finder MCP server built on TheMealDB
+    API. Covers the five endpoints required to search, browse, filter, and retrieve
+    full recipe data.
+
+    The public test key `1` is embedded directly in the server base URL path — no
+    API key query parameter or request header is required.
+
+    Ingredient and measure data in full meal records uses numbered fields rather
+    than an array: `strIngredient1` through `strIngredient20` and `strMeasure1`
+    through `strMeasure20`. Empty or unused slots are returned as empty strings or
+    null values and should be filtered out by the client.
+
+    Meal thumbnail images are absolute URLs returned in the `strMealThumb` field
+    and can be displayed directly.
+
+    Source API documentation: https://www.themealdb.com/api.php
+  version: "1.0.0"
+  contact:
+    name: TheMealDB API Documentation
+    url: https://www.themealdb.com/api.php
+  license:
+    name: Creative Commons Attribution-ShareAlike 3.0 Unported
+    url: https://creativecommons.org/licenses/by-sa/3.0/
+
+servers:
+  - url: https://www.themealdb.com/api/json/v1/1
+    description: TheMealDB public production server (test key embedded in path)
+
+# This API requires no authentication. The public test key is part of the
+# base URL path (/v1/1) rather than a query parameter or header.
+security: []
+
+paths:
+  /search.php:
+    get:
+      operationId: searchMeals
+      summary: Search meals by name
+      description: |
+        Full-text search across meal names. Returns every meal whose name
+        contains the query string. Each result includes the full meal record
+        with instructions and all ingredient/measure pairs — there is no
+        separate "details" call needed after a search.
+
+        Pass an empty string (`s=`) to return all meals in the database,
+        though this is a large payload and should be used sparingly.
+      parameters:
+        - name: s
+          in: query
+          required: true
+          description: >
+            The meal name (or partial name) to search for. Case-insensitive.
+            For example, `s=chicken` returns all meals whose name contains
+            "chicken". Pass an empty string to retrieve all meals.
+          schema:
+            type: string
+            example: "Arrabiata"
+      responses:
+        '200':
+          description: >
+            Successful response. The `meals` array contains all matching
+            full meal records. If no meals match the query, `meals` is `null`.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MealListResponse'
+        '400':
+          description: Bad request — missing or malformed query parameter.
+
+  /lookup.php:
+    get:
+      operationId: getMealById
+      summary: Get full meal details by ID
+      description: |
+        Returns the complete record for a single meal identified by its
+        TheMealDB numeric ID. The response includes cooking instructions,
+        category, cuisine area, tags, a YouTube link, and all 20 ingredient
+        and measure slots.
+
+        Use this endpoint to retrieve full details after obtaining a meal ID
+        from `filterMeals`, which returns only summary data.
+      parameters:
+        - name: i
+          in: query
+          required: true
+          description: >
+            The numeric TheMealDB identifier of the meal to retrieve.
+            Meal IDs can be obtained from `searchMeals`, `filterMeals`,
+            or `getRandomMeal`.
+          schema:
+            type: string
+            example: "52772"
+      responses:
+        '200':
+          description: >
+            Successful response. The `meals` array contains exactly one full
+            meal record. If no meal exists for the given ID, `meals` is `null`.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MealListResponse'
+        '400':
+          description: Bad request — missing or malformed `i` parameter.
+        '404':
+          description: No meal found for the provided ID.
+
+  /categories.php:
+    get:
+      operationId: listCategories
+      summary: List all meal categories
+      description: |
+        Returns the complete list of meal categories available in TheMealDB,
+        each with a name, thumbnail image URL, and a short description.
+
+        Use category names returned here as the value for the `c` parameter
+        when calling `filterMeals`.
+      responses:
+        '200':
+          description: Successful response containing the full list of meal categories.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoryListResponse'
+        '400':
+          description: Bad request — unexpected query parameters or malformed request.
+        '404':
+          description: Endpoint not found — verify the base URL is correct.
+
+  /filter.php:
+    get:
+      operationId: filterMeals
+      summary: Filter meals by category, cuisine, or ingredient
+      description: |
+        Returns a list of meal summaries (name, thumbnail, ID only) filtered
+        by exactly one of three criteria: category, area/cuisine, or a main
+        ingredient. Supply only one of `c`, `a`, or `i` per request — passing
+        multiple filters is not supported and will return unexpected results.
+
+        Because this endpoint returns summary data only, follow up with
+        `getMealById` to retrieve the full recipe for any meal of interest.
+
+        Examples of valid values:
+        - `c=Seafood` — meals in the Seafood category
+        - `a=Italian` — meals from Italian cuisine
+        - `i=chicken_breast` — meals that use chicken breast
+      parameters:
+        - name: c
+          in: query
+          required: false
+          description: >
+            Filter meals by category name. Use names returned by `listCategories`
+            (e.g. `Beef`, `Chicken`, `Dessert`, `Seafood`, `Vegetarian`).
+            Supply only one of `c`, `a`, or `i`.
+          schema:
+            type: string
+            example: "Seafood"
+        - name: a
+          in: query
+          required: false
+          description: >
+            Filter meals by cuisine area (e.g. `Italian`, `Mexican`, `Indian`,
+            `Japanese`, `British`). Supply only one of `c`, `a`, or `i`.
+          schema:
+            type: string
+            example: "Italian"
+        - name: i
+          in: query
+          required: false
+          description: >
+            Filter meals by a primary ingredient (e.g. `chicken_breast`,
+            `salmon`, `avocado`). Use underscores in place of spaces.
+            Supply only one of `c`, `a`, or `i`.
+          schema:
+            type: string
+            example: "chicken_breast"
+      responses:
+        '200':
+          description: >
+            Successful response. The `meals` array contains summary records
+            (name, thumbnail, ID) for every meal matching the filter.
+            If no meals match, `meals` is `null`.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MealSummaryListResponse'
+        '400':
+          description: Bad request — no recognised filter parameter supplied.
+
+  /random.php:
+    get:
+      operationId: getRandomMeal
+      summary: Get a single random meal
+      description: |
+        Returns a complete meal record selected at random from the entire
+        TheMealDB database. The response shape is identical to `searchMeals`
+        and `getMealById`, including full instructions and all ingredient
+        and measure fields.
+
+        Call this endpoint to provide meal inspiration when the user has no
+        specific query in mind.
+      responses:
+        '200':
+          description: >
+            Successful response. The `meals` array contains exactly one
+            randomly selected full meal record.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MealListResponse'
+        '400':
+          description: Bad request — unexpected query parameters or malformed request.
+        '404':
+          description: Endpoint not found — verify the base URL is correct.
+
+components:
+  schemas:
+    MealSummary:
+      type: object
+      description: >
+        A condensed meal record returned by the filter endpoint. Contains only
+        the meal name, thumbnail URL, and ID. Use `getMealById` to retrieve the
+        full recipe.
+      properties:
+        idMeal:
+          type: string
+          description: Unique TheMealDB numeric identifier for the meal, returned as a string.
+          example: "52772"
+        strMeal:
+          type: string
+          description: Display name of the meal.
+          example: "Teriyaki Chicken Casserole"
+        strMealThumb:
+          type: string
+          description: Absolute URL of the meal's thumbnail image.
+          example: "https://www.themealdb.com/images/media/meals/wvpsxx1468256321.jpg"
+
+    MealDetails:
+      type: object
+      description: >
+        A complete meal record including cooking instructions, category, cuisine
+        area, tags, a YouTube video link, and up to 20 ingredient/measure pairs
+        stored as numbered fields.
+      properties:
+        idMeal:
+          type: string
+          description: Unique TheMealDB numeric identifier for the meal, returned as a string.
+          example: "52772"
+        strMeal:
+          type: string
+          description: Display name of the meal.
+          example: "Teriyaki Chicken Casserole"
+        strCategory:
+          type: string
+          description: The category the meal belongs to (e.g. Chicken, Seafood, Dessert).
+          example: "Chicken"
+        strArea:
+          type: string
+          description: The cuisine area or country of origin (e.g. Japanese, Italian, Mexican).
+          example: "Japanese"
+        strInstructions:
+          type: string
+          description: Step-by-step cooking instructions as a plain text string.
+          example: "Preheat oven to 350° F. Spray a 9x13-inch baking pan with non-stick spray..."
+        strMealThumb:
+          type: string
+          description: Absolute URL of the meal's thumbnail image.
+          example: "https://www.themealdb.com/images/media/meals/wvpsxx1468256321.jpg"
+        strTags:
+          type: ["string", "null"]
+          description: Comma-separated list of descriptive tags, or null if none are set.
+          example: "Meat,Casserole"
+        strYoutube:
+          type: ["string", "null"]
+          description: URL of a YouTube video demonstrating how to make the meal, or null.
+          example: "https://www.youtube.com/watch?v=4aZr5hZXP_s"
+        strIngredient1:
+          type: ["string", "null"]
+          description: Name of the 1st ingredient. Empty string or null if unused.
+          example: "soy sauce"
+        strIngredient2:
+          type: ["string", "null"]
+          description: Name of the 2nd ingredient. Empty string or null if unused.
+          example: "water"
+        strIngredient3:
+          type: ["string", "null"]
+          description: Name of the 3rd ingredient. Empty string or null if unused.
+          example: "brown sugar"
+        strIngredient4:
+          type: ["string", "null"]
+          description: Name of the 4th ingredient. Empty string or null if unused.
+          example: "ground ginger"
+        strIngredient5:
+          type: ["string", "null"]
+          description: Name of the 5th ingredient. Empty string or null if unused.
+          example: "minced garlic"
+        strIngredient6:
+          type: ["string", "null"]
+          description: Name of the 6th ingredient. Empty string or null if unused.
+          example: "cornstarch"
+        strIngredient7:
+          type: ["string", "null"]
+          description: Name of the 7th ingredient. Empty string or null if unused.
+          example: "chicken breasts"
+        strIngredient8:
+          type: ["string", "null"]
+          description: Name of the 8th ingredient. Empty string or null if unused.
+          example: "stir-fry vegetables"
+        strIngredient9:
+          type: ["string", "null"]
+          description: Name of the 9th ingredient. Empty string or null if unused.
+          example: "brown rice"
+        strIngredient10:
+          type: ["string", "null"]
+          description: Name of the 10th ingredient. Empty string or null if unused.
+          example: ""
+        strIngredient11:
+          type: ["string", "null"]
+          description: Name of the 11th ingredient. Empty string or null if unused.
+          example: ""
+        strIngredient12:
+          type: ["string", "null"]
+          description: Name of the 12th ingredient. Empty string or null if unused.
+          example: ""
+        strIngredient13:
+          type: ["string", "null"]
+          description: Name of the 13th ingredient. Empty string or null if unused.
+          example: ""
+        strIngredient14:
+          type: ["string", "null"]
+          description: Name of the 14th ingredient. Empty string or null if unused.
+          example: ""
+        strIngredient15:
+          type: ["string", "null"]
+          description: Name of the 15th ingredient. Empty string or null if unused.
+          example: ""
+        strIngredient16:
+          type: ["string", "null"]
+          description: Name of the 16th ingredient. Empty string or null if unused.
+          example: ""
+        strIngredient17:
+          type: ["string", "null"]
+          description: Name of the 17th ingredient. Empty string or null if unused.
+          example: ""
+        strIngredient18:
+          type: ["string", "null"]
+          description: Name of the 18th ingredient. Empty string or null if unused.
+          example: ""
+        strIngredient19:
+          type: ["string", "null"]
+          description: Name of the 19th ingredient. Empty string or null if unused.
+          example: ""
+        strIngredient20:
+          type: ["string", "null"]
+          description: Name of the 20th ingredient. Empty string or null if unused.
+          example: ""
+        strMeasure1:
+          type: ["string", "null"]
+          description: Quantity/unit for the 1st ingredient (paired with strIngredient1). Empty string or null if unused.
+          example: "3/4 cup"
+        strMeasure2:
+          type: ["string", "null"]
+          description: Quantity/unit for the 2nd ingredient (paired with strIngredient2). Empty string or null if unused.
+          example: "1/2 cup"
+        strMeasure3:
+          type: ["string", "null"]
+          description: Quantity/unit for the 3rd ingredient (paired with strIngredient3). Empty string or null if unused.
+          example: "1/4 cup"
+        strMeasure4:
+          type: ["string", "null"]
+          description: Quantity/unit for the 4th ingredient (paired with strIngredient4). Empty string or null if unused.
+          example: "1/2 teaspoon"
+        strMeasure5:
+          type: ["string", "null"]
+          description: Quantity/unit for the 5th ingredient (paired with strIngredient5). Empty string or null if unused.
+          example: "1/2 teaspoon"
+        strMeasure6:
+          type: ["string", "null"]
+          description: Quantity/unit for the 6th ingredient (paired with strIngredient6). Empty string or null if unused.
+          example: "4 Tablespoons"
+        strMeasure7:
+          type: ["string", "null"]
+          description: Quantity/unit for the 7th ingredient (paired with strIngredient7). Empty string or null if unused.
+          example: "2"
+        strMeasure8:
+          type: ["string", "null"]
+          description: Quantity/unit for the 8th ingredient (paired with strIngredient8). Empty string or null if unused.
+          example: "1 bag"
+        strMeasure9:
+          type: ["string", "null"]
+          description: Quantity/unit for the 9th ingredient (paired with strIngredient9). Empty string or null if unused.
+          example: "3 cups"
+        strMeasure10:
+          type: ["string", "null"]
+          description: Quantity/unit for the 10th ingredient (paired with strIngredient10). Empty string or null if unused.
+          example: ""
+        strMeasure11:
+          type: ["string", "null"]
+          description: Quantity/unit for the 11th ingredient (paired with strIngredient11). Empty string or null if unused.
+          example: ""
+        strMeasure12:
+          type: ["string", "null"]
+          description: Quantity/unit for the 12th ingredient (paired with strIngredient12). Empty string or null if unused.
+          example: ""
+        strMeasure13:
+          type: ["string", "null"]
+          description: Quantity/unit for the 13th ingredient (paired with strIngredient13). Empty string or null if unused.
+          example: ""
+        strMeasure14:
+          type: ["string", "null"]
+          description: Quantity/unit for the 14th ingredient (paired with strIngredient14). Empty string or null if unused.
+          example: ""
+        strMeasure15:
+          type: ["string", "null"]
+          description: Quantity/unit for the 15th ingredient (paired with strIngredient15). Empty string or null if unused.
+          example: ""
+        strMeasure16:
+          type: ["string", "null"]
+          description: Quantity/unit for the 16th ingredient (paired with strIngredient16). Empty string or null if unused.
+          example: ""
+        strMeasure17:
+          type: ["string", "null"]
+          description: Quantity/unit for the 17th ingredient (paired with strIngredient17). Empty string or null if unused.
+          example: ""
+        strMeasure18:
+          type: ["string", "null"]
+          description: Quantity/unit for the 18th ingredient (paired with strIngredient18). Empty string or null if unused.
+          example: ""
+        strMeasure19:
+          type: ["string", "null"]
+          description: Quantity/unit for the 19th ingredient (paired with strIngredient19). Empty string or null if unused.
+          example: ""
+        strMeasure20:
+          type: ["string", "null"]
+          description: Quantity/unit for the 20th ingredient (paired with strIngredient20). Empty string or null if unused.
+          example: ""
+        strSource:
+          type: ["string", "null"]
+          description: URL of the original recipe source website, or null if not provided.
+          example: "https://www.allrecipes.com/recipe/16354/easy-teriyaki-chicken-casserole/"
+        strImageSource:
+          type: ["string", "null"]
+          description: URL crediting the source of the thumbnail image, or null.
+          example: null
+        strCreativeCommonsConfirmed:
+          type: ["string", "null"]
+          description: Indicates whether the recipe is confirmed as Creative Commons licensed. Typically null.
+          example: null
+        dateModified:
+          type: ["string", "null"]
+          description: ISO 8601 timestamp of when the meal record was last modified, or null.
+          example: null
+
+    MealListResponse:
+      type: object
+      description: >
+        Wrapper returned by search, lookup, and random endpoints. The `meals`
+        property holds an array of full meal records, or `null` when no results
+        were found.
+      properties:
+        meals:
+          type: ["array", "null"]
+          description: >
+            Array of full meal records matching the request. `null` when no
+            meals are found (e.g. a search query with no matches, or an unknown ID).
+          items:
+            $ref: '#/components/schemas/MealDetails'
+
+    MealSummaryListResponse:
+      type: object
+      description: >
+        Wrapper returned by the filter endpoint. The `meals` property holds an
+        array of condensed meal records (name, thumbnail, ID only), or `null`
+        when no results match the filter.
+      properties:
+        meals:
+          type: ["array", "null"]
+          description: >
+            Array of meal summaries matching the filter. `null` when no meals
+            match the supplied category, area, or ingredient.
+          items:
+            $ref: '#/components/schemas/MealSummary'
+
+    Category:
+      type: object
+      description: A meal category as returned by the categories endpoint.
+      properties:
+        idCategory:
+          type: string
+          description: Unique numeric identifier of the category, returned as a string.
+          example: "1"
+        strCategory:
+          type: string
+          description: Display name of the category. Use this value as the `c` parameter in `filterMeals`.
+          example: "Beef"
+        strCategoryThumb:
+          type: string
+          description: Absolute URL of the category's thumbnail image.
+          example: "https://www.themealdb.com/images/category/beef.png"
+        strCategoryDescription:
+          type: string
+          description: Short prose description of the category and its typical dishes.
+          example: "Beef is the culinary name for meat from cattle, particularly skeletal muscle..."
+
+    CategoryListResponse:
+      type: object
+      description: Wrapper returned by the categories endpoint.
+      properties:
+        categories:
+          type: array
+          description: Complete list of all meal categories in TheMealDB.
+          items:
+            $ref: '#/components/schemas/Category'
