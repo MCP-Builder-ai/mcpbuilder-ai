@@ -1,0 +1,40 @@
+fulfillments:
+
+  - name: create_hash
+    summary: Create hash attribute
+    type: GENERIC
+    attributes:
+      - hash: RANDOM(256)
+
+  - name: create_roast
+    summary: Create a new roast record
+    type: UPDATE
+    instructions:
+      - request:
+          url: https://lixvoeyyhighrgjovtsh.supabase.co/rest/v1/roasts
+          httpType: POST
+          contentType: application/json
+          headerParameters:
+            - apikey: ___PARAMETER___(APIKEY)
+            - Authorization: ___PARAMETER___(AUTHORIZATION)
+          schema:
+            hash: ATTRIBUTE(hash)
+            roast_text: BODY(roast_text)
+            laziness: BODY(laziness)
+            laziness_comment: BODY(laziness_comment)
+            thankfulness: BODY(thankfulness)
+            thankfulness_comment: BODY(thankfulness_comment)
+            confusion: BODY(confusion)
+            confusion_comment: BODY(confusion_comment)
+            friendship: BODY(friendship)
+            friendship_comment: BODY(friendship_comment)
+          allowFailure: False
+          forwardResponseErrors: True
+
+responses:
+
+  - name: ok
+    statuscode: 200
+    default: True
+    schema:
+      link: TEXT(https://test.com) . ATTRIBUTE(hash)
