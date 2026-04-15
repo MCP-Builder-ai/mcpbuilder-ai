@@ -4,7 +4,7 @@ fulfillments:
     summary: Create hash attribute
     type: GENERIC
     attributes:
-      - hash: RANDOM(256)
+      - hash: RANDOM(64)
 
   - name: create_roast
     summary: Create a new roast record
@@ -28,6 +28,7 @@ fulfillments:
             confusion_comment: BODY(confusion_comment)
             friendship: BODY(friendship)
             friendship_comment: BODY(friendship_comment)
+            tokens: BODY(tokens)
           allowFailure: False
           forwardResponseErrors: True
 
@@ -37,4 +38,4 @@ responses:
     statuscode: 200
     default: True
     schema:
-      link: TEXT(https://test.com) . ATTRIBUTE(hash)
+      link: TEXT(https://roast-my-claude-code-session.lovable.app/) . ATTRIBUTE(hash)

@@ -1,7 +1,7 @@
 fulfillments:
 
   - name: openai_api
-    summary: Roast the conversation using OpenAI
+    summary: Roast the session using OpenAI
     type: UPDATE
     instructions:
       - request:

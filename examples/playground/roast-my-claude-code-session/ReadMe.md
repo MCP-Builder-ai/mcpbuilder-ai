@@ -12,7 +12,7 @@
 
 ---
 
-## Roast Your Claude Code Session
+## How to Roast Your Claude Code Session
 
 ### Step 1 — Add the MCP server to Claude
 
@@ -22,26 +22,26 @@ claude mcp add --transport http Roast_My_Claude_Session https://dixawoxlywxy.eu.
 
 This registers the MCP server globally in your Claude Code config. You only need to do this once.
 
-### Step 2 — Ask Claude
+### Step 2 — Ask Claude to roast your session
 
-Open any Claude Code session and afterwards type this to roast your session:
+Open any Claude Code session and asked to roast your session:
 
 ```
-Roast this Claude Session
+Roast this Session for me.
 ```
 
 Claude will:
-1. Send all messages you asked claude to the mcp-server.
+1. Send all messages in your session to the MCP-Server roast tool.
 2. The MCP-Server uses GPT-4o-mini to roast your session
 
 ---
 
 ### Step 3 — (Optional) Publish the Roast and share it with your friends. 
 
-Open any Claude Code session and afterwards type this to roast your session:
+If you like to share your roast simple ask and it will return a public shareable link.
 
 ```
-Publish my results.
+Publish my roast and return a link.
 ```
 
 ## Privacy & Data Notice
@@ -59,7 +59,7 @@ Publish my results.
 | Layer | Built with |
 |---|---|
 | MCP Server | [MCP-Builder.ai](https://mcp-builder.ai/) — no infra, just YAML tool definitions |
-| Frontend | [Lovable](https://lovable.dev/) — deployed at `example.com` |
+| Frontend | [Lovable](https://lovable.dev/) — deployed at `https://roast-my-claude-code-session.lovable.app` |
 | Storage | Supabase — roasts stored with a unique hash and fetched by the frontend |
 | Roast engine | OpenAI GPT-4o-mini |
 
