@@ -1,0 +1,31 @@
+fulfillments:
+
+  - name: openai_api
+    summary: Roast the session using OpenAI
+    type: UPDATE
+    instructions:
+      - request:
+          url: https://api.openai.com/v1/responses
+          httpType: POST
+          contentType: application/json
+          headerParameters:
+            - Authorization: TEXT(Bearer ) . ___PARAMETER___(OPENAI_API_KEY)
+          schema:
+            model: TEXT(gpt-4o-mini)
+            input:
+              list: LIST(2)
+              item:
+                - role: TEXT(system)
+                  content: ___PARAMETER___(SYSTEM_MESSAGE)
+                - role: TEXT(user)
+                  content: GET_JSON(BODY())
+          allowFailure: False
+          forwardResponseErrors: True
+
+responses:
+
+  - name: ok
+    statuscode: 200
+    default: True
+    schema:
+      roast: VALUE(openai_api, $.output[0].content[0].text)
