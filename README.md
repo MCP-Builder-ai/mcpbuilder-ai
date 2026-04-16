@@ -138,7 +138,7 @@ The [examples](./examples/) directory contains ready-to-run projects showing how
 | [React MCP Chat](./examples/typescript/react-mcp-chat/) | TypeScript | React-based chat UI with streaming + tool consent |
 | [Simple Python CLI](./examples/python/simple-python-cli/) | Python | Terminal chat client with live token streaming |
 
-> **New to MCP-Builder.ai?** Check the [Getting Started guide](./examples/mcp-usecase/README.md) to create your first project and grab a project token.
+> **New to MCP-Builder.ai?** Check the [Getting Started guide](./docs/getting-started.md) to create your first project and grab a project token.
 
 ---
 

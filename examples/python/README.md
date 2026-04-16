@@ -18,7 +18,7 @@ A simple terminal-based chat client showing how to:
 
 - Python 3.10 or higher
 - A project on [MCP-Builder.ai](https://mcp-builder.ai/) with a valid project token and deployment name
-- See the [Getting Started guide](../mcp-usecase/README.md) to set up your MCP project
+- See the [Getting Started guide](../../docs/getting-started.md) to set up your MCP project
 
 ## Quick Start
 
